@@ -22,51 +22,57 @@ face_detect_net = cv2.dnn.readNet(face_detect_model, face_detect_config)
 gender_classifier_net = cv2.dnn.readNet(gender_classifier_model, gender_classifier_config)
 age_classifier_net = cv2.dnn.readNet(age_classifier_model, age_classifier_config)
 
-# cap = cv2.VideoCapture(0)
-img = cv2.imread("face_0003.png")
+imgs_list = ["01.jpg","02.jpg","03.jpg","04.jpg","05.jpg"]
 
-if img is None:
-    sys.exit()
+for img_path in imgs_list:
 
-blob1 = cv2.dnn.blobFromImage(img, scalefactor=1, size=(300, 300),\
-                                  mean=(104, 177, 123))
-face_detect_net.setInput(blob1)
-out = face_detect_net.forward()
+    img = cv2.imread(img_path)
+    
+    if img is None:
+        sys.exit()
 
-face_detected = out[0, 0, :, :]
-(h,w) = img.shape[:2]
+    # img = cv2.resize(img, dsize=(0,0), fx=0.7, fy=0.7, interpolation=cv2.INTER_AREA)
 
-for i in range(face_detected.shape[0]):
-    confidence = face_detected[i, 2]
-    if confidence < 0.5:
-        break
+    blob1 = cv2.dnn.blobFromImage(img, scalefactor=1, size=(300, 300),\
+                                    mean=(104, 177, 123))
+    face_detect_net.setInput(blob1)
+    out = face_detect_net.forward()
 
-    x1 = int(face_detected[i, 3] * w)
-    y1 = int(face_detected[i, 4] * h)
-    x2 = int(face_detected[i, 5] * w)
-    y2 = int(face_detected[i, 6] * h)
+    face_detected = out[0, 0, :, :]
+    (h,w) = img.shape[:2]
 
-    face = img[y1:y2, x1:x2].copy()
+    for i in range(face_detected.shape[0]):
+        confidence = face_detected[i, 2]
+        if confidence < 0.5:
+            break
 
-    blob2 = cv2.dnn.blobFromImage(face, scalefactor=1, size=(227,227), \
-        mean=(78.4263377603, 87.7689143744, 114.895847746), \
-        swapRB=False, crop=False)
+        x1 = int(face_detected[i, 3] * w)
+        y1 = int(face_detected[i, 4] * h)
+        x2 = int(face_detected[i, 5] * w)
+        y2 = int(face_detected[i, 6] * h)
 
-    gender_classifier_net.setInput(blob2)
-    gender_out = gender_classifier_net.forward()
-    _, maxVal, _, maxLoc = cv2.minMaxLoc(gender_out)
-    gender = gender_list[maxLoc[0]]
+        face = img[y1:y2, x1:x2].copy()
 
-    age_classifier_net.setInput(blob2)
-    age_out = age_classifier_net.forward()
-    _, maxVal, _, maxLoc = cv2.minMaxLoc(age_out)
-    age = age_list[maxLoc[0]]
+        blob2 = cv2.dnn.blobFromImage(face, scalefactor=1, size=(227,227), \
+            mean=(78.4263377603, 87.7689143744, 114.895847746), \
+            swapRB=False, crop=False)
 
-    cv2.rectangle(img, (x1, y1), (x2, y2), (0, 255, 0))
-    label = f"{gender}, {age}"
-    cv2.putText(img, label, (x1, y1-1), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 0), 1, cv2.LINE_AA)
+        gender_classifier_net.setInput(blob2)
+        gender_out = gender_classifier_net.forward()
+        gender = gender_list[gender_out.argmax()]
 
-cv2.imshow('img', img)
-cv2.waitKey()
+        age_classifier_net.setInput(blob2)
+        age_out = age_classifier_net.forward()
+        age = age_list[age_out.argmax()]
+
+        cv2.rectangle(img, (x1, y1), (x2, y2), (0, 255, 0))
+        label = f"{gender}, {age}"
+        cv2.putText(img, label, (x1, y1-1), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 0), 1, cv2.LINE_AA)
+        print(label)
+
+    cv2.imshow('img', img)
+    if cv2.waitKey() == ord(" "):
+        continue
+    
 cv2.destroyAllWindows()
 

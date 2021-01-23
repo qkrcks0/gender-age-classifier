@@ -3,7 +3,8 @@ import cv2
 import sys
 
 # labels
-age_list = ['(0, 3)','(4, 8)','(9, 15)','(16, 25)','(26, 35)','(36, 45)','(46, 59)','(60, 100)']
+# age_list = ['(0, 7)','(8, 13)','(14, 19)','(20,33)','(34,45)','(46,60)','(61,73)','(74, 100)']
+age_list = ['(0, 2)','(4, 6)','(8, 12)','(15, 20)','(25, 32)','(38, 43)','(48, 53)','(60, 100)']
 gender_list = ['Male', 'Female']
 
 # face detect model
@@ -22,7 +23,9 @@ face_detect_net = cv2.dnn.readNet(face_detect_model, face_detect_config)
 gender_classifier_net = cv2.dnn.readNet(gender_classifier_model, gender_classifier_config)
 age_classifier_net = cv2.dnn.readNet(age_classifier_model, age_classifier_config)
 
-imgs_list = ["01.jpg","02.jpg","03.jpg","04.jpg","05.jpg"]
+imgs_list = ["01.jpg","02.jpg","03.jpg","04.jpg","05.jpg","06.jpg",\
+             "07.jpg","08.jpg","09.jpg","10.jpg","11.jpg","12.jpg",\
+             "13.jpg","14.jpg","15.jpg"]
 
 for img_path in imgs_list:
 
@@ -31,10 +34,10 @@ for img_path in imgs_list:
     if img is None:
         sys.exit()
 
-    # img = cv2.resize(img, dsize=(0,0), fx=0.7, fy=0.7, interpolation=cv2.INTER_AREA)
+    # img = cv2.resize(img, dsize=(300,300), interpolation=cv2.INTER_AREA)
 
     blob1 = cv2.dnn.blobFromImage(img, scalefactor=1, size=(300, 300),\
-                                    mean=(104, 177, 123))
+                                  mean=(104, 177, 123))
     face_detect_net.setInput(blob1)
     out = face_detect_net.forward()
 
@@ -51,7 +54,7 @@ for img_path in imgs_list:
         x2 = int(face_detected[i, 5] * w)
         y2 = int(face_detected[i, 6] * h)
 
-        face = img[y1:y2, x1:x2].copy()
+        face = img[y1:y2+10, x1:x2].copy()
 
         blob2 = cv2.dnn.blobFromImage(face, scalefactor=1, size=(227,227), \
             mean=(78.4263377603, 87.7689143744, 114.895847746), \
@@ -59,11 +62,11 @@ for img_path in imgs_list:
 
         gender_classifier_net.setInput(blob2)
         gender_out = gender_classifier_net.forward()
-        gender = gender_list[gender_out.argmax()]
+        gender = gender_list[gender_out[0].argmax()]
 
         age_classifier_net.setInput(blob2)
         age_out = age_classifier_net.forward()
-        age = age_list[age_out.argmax()]
+        age = age_list[age_out[0].argmax()]
 
         cv2.rectangle(img, (x1, y1), (x2, y2), (0, 255, 0))
         label = f"{gender}, {age}"

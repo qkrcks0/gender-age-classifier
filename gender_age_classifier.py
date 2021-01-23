@@ -36,8 +36,8 @@ while True:
 
     blob1 = cv2.dnn.blobFromImage(frame, scalefactor=1, size=(300, 300),\
                                   mean=(104, 177, 123))
-    net.setInput(blob1)
-    out = net.forward()
+    face_detect_net.setInput(blob1)
+    out = face_detect_net.forward()
 
     face_detected = out[0, 0, :, :]
     (h,w) = frame.shape[:2]
@@ -52,24 +52,30 @@ while True:
         x2 = int(face_detected[i, 5] * w)
         y2 = int(face_detected[i, 6] * h)
 
-        cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0))
+        face = frame[y1:y2, x1:x2].copy()
 
-        label = f'Face: {confidence:4.2f}'
-        cv2.putText(frame, label, (x1, y1 - 1), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 0), 1, cv2.LINE_AA)
+        blob2 = cv2.dnn.blobFromImage(face, scalefactor=1, size=(227,227), \
+            mean=(74.4263377603, 87.7689143744, 114.895847746), \
+            swapRB=False, crop=False)
+
+        gender_classifier_net.setInput(blob2)
+        gender_out = gender_classifier_net.forward()
+        _, maxVal, _, maxLoc = cv2.minMaxLoc(gender_out)
+        gender = gender_list[maxLoc[0]]
+
+        age_classifier_net.setInput(blob2)
+        age_out = age_classifier_net.forward()
+        _, maxVal, _, maxLoc = cv2.minMaxLoc(age_out)
+        age = age_list[maxLoc[0]]
+
+        cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0))
+        label = f"{gender}, {age}"
+        cv2.putText(frame, label, (x1, y1-1), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 0), 1, cv2.LINE_AA)
 
     cv2.imshow('frame', frame)
 
-    blob2 = cv2.dnn.blobFromImage(frame, scalefactor=1, size=(227,227), \
-            mean=(74.4263377603, 87.7689143744, 114.895847746), \
-            swapRB=False, crop=False)
+    if cv2.waitKey(1) == 27:
+        break
+
+cv2.destroyAllWindows()
     
-    # gender_classifier_net.setInput(blob)
-    # gender_out = gender_classifier_net.forward()
-    # gender = 123
-
-
-
-
-
-
-

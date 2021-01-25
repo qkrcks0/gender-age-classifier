@@ -11,6 +11,9 @@ gender_list = ['Male', 'Female']
 # face detect model
 face_detector = dlib.get_frontal_face_detector()
 
+# landmarks detect model
+sp = dlib.shape_predictor("models/shape_predictor_5_face_landmarks.dat")
+
 # gender classifier model
 gender_classifier_model = "models/gender_net.caffemodel"
 gender_classifier_config = "models/deploy_gender.prototxt"
@@ -41,8 +44,11 @@ for img_path in imgs_list:
     for face in faces:
 
         x1,y1,x2,y2 = face.left(), face.top(), face.right(), face.bottom()
+        
+        s = sp(img, face)
 
-        face_img = img[y1:y2, x1:x2].copy()
+        # face_img = img[y1:y2, x1:x2].copy()
+        face_img = dlib.get_face_chip(img, s, size=256, padding=0.2)
 
         # create blob object to classify gender and age group
         blob = cv2.dnn.blobFromImage(face_img, scalefactor=1, size=(227,227), \

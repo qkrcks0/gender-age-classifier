@@ -40,6 +40,7 @@ for img_path in imgs_list:
         sys.exit()
 
     print(type(img))
+    print(img.shape)
     # to detect faces
     faces = face_detector(img)
 

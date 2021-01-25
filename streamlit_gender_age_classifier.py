@@ -79,7 +79,7 @@ face_detector, sp, gender_classifier_net, age_classifier_net = load_models()
 uploaded_file = st.file_uploader("Choose an image to Classify...")
 if uploaded_file is not None:
     img = np.array(Image.open(uploaded_file))
-    
+
     st.image(img, caption='Uploaded Image.', use_column_width=True)
 
     st.write("")

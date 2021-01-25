@@ -20,6 +20,7 @@ gender_classifier_config = "models/deploy_gender.prototxt"
 
 # age classifier model
 age_classifier_model = "models/age_net.caffemodel"
+# age_classifier_model = "models/age_net2222.caffemodel"
 age_classifier_config = "models/deploy_age.prototxt"
 
 # create nets
@@ -38,6 +39,7 @@ for img_path in imgs_list:
     if img is None:
         sys.exit()
 
+    print(type(img))
     # to detect faces
     faces = face_detector(img)
 
@@ -46,7 +48,7 @@ for img_path in imgs_list:
         x1,y1,x2,y2 = face.left(), face.top(), face.right(), face.bottom()
         
         s = sp(img, face)
-
+ 
         # face_img = img[y1:y2, x1:x2].copy()
         face_img = dlib.get_face_chip(img, s, size=256, padding=0.2)
 
@@ -67,9 +69,9 @@ for img_path in imgs_list:
 
         # draw rectangle around the face object
         cv2.rectangle(img, (x1, y1), (x2, y2), (0, 255, 0))
-        label = f"{gender}, {age}"
-        cv2.putText(img, label, (x1, y1-1), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 0), 1, cv2.LINE_AA)
-        print(label)
+        labels = f"{gender}, {age}"
+        cv2.putText(img, labels, (x1, y1-1), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 0), 1, cv2.LINE_AA)
+        print(labels)
 
     cv2.imshow('img', img)
     if cv2.waitKey() == ord(" "):

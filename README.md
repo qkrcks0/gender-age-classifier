@@ -26,12 +26,6 @@ Image from PIL
 
 pandas
 
-
-## 설치 방법
-```
-git clone https://github.com/qkrcks0/gender-age-classifier.git
-stremlit run streamlit_gender_age_classifier.py
-```
 ## 사용 영상
 https://www.youtube.com/watch?v=Vt7OfXkMrnU
 
